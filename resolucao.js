@@ -1,8 +1,10 @@
-const brokenDB = require('./broken-database.json');
+//funcao para leitura do json
+const readJSON = () => require('./broken-database.json');
 
 //Funcao para recuperar o nome verdadeiro
 const recoverName = () => {
 
+    brokenDB = readJSON();
     //cria um array apenas com os nomes
     names = brokenDB.map(obj => obj.name);
     
@@ -24,13 +26,12 @@ const recoverName = () => {
     });
 
     //console.log(nameFormated);
-
-    return nameFormated;
 }
 
 //Funcao que recupera os precos transformando as string em numbers
 const recoverPrice = () => {
     
+    brokenDB = readJSON();
     //cria um array so com os precos
     prices = brokenDB.map(obj => obj.price);
 
@@ -52,9 +53,65 @@ const recoverPrice = () => {
     });
     
     //console.log(priceFormated);
-    return priceFormated;
 }
 
-recoverName();
-recoverPrice();
-console.log(brokenDB);
+//Funcao que cria os objetos que serao salvos na saida
+const createObjects = () => {
+
+    brokenDB = readJSON();
+    //chama as funcoes que corrige o nome e preco
+    recoverName();
+    recoverPrice();
+
+    //copia para alterar no vetor final apenas
+    finalObj = brokenDB;
+
+    //percorre todos os objetos
+    for (const index in finalObj) {
+
+        //altera o nome para o corrigido ja que eles sempre estao no mesmo index
+        finalObj[index].name = nameFormated[index];
+
+        //altera o preco para o corrigido
+        finalObj[index].price = priceFormated[index];
+
+        //verifica se o objeto tem o atributo quantity
+        if(!finalObj[index].quantity){
+
+            //se nao tiver e colocado como 0 a quantidade
+            finalObj[index].quantity = 0;          
+        }
+    }
+    
+    //console.log(brokenDB);
+    saveJSON(finalObj);
+}
+
+//funcao que cira o arquivo saida.json
+const saveJSON = (data) => {
+
+    /*
+        Para criar essa funcao utilizei como base a funcao apresentada
+         no canal charscript no seguinte video:
+         https://youtu.be/T7s3st6xfpA
+    */
+
+    const fs = require('fs');
+
+    //funcao chamada em caso de erro na hora de escrever o arquivo
+    const finished = (error) => {
+        if( error ){
+            console.error(error);
+            return;
+        }
+    }
+
+    //transforma o array recebido em tipo json
+    const JSONData = JSON.stringify(data, null, 2);
+
+    //escreve no arquivo saida.json
+    fs.writeFile('saida.json', JSONData, finished);
+}
+
+readJSON();
+createObjects();

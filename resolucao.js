@@ -28,5 +28,33 @@ const recoverName = () => {
     return nameFormated;
 }
 
+//Funcao que recupera os precos transformando as string em numbers
+const recoverPrice = () => {
+    
+    //cria um array so com os precos
+    prices = brokenDB.map(obj => obj.price);
+
+    //array de retorno com todos os valores sendo numeros
+    priceFormated = [];
+
+    //percorre todos os precos
+    prices.forEach(price => {
+
+        //verifica se o valor nao e um numero
+        if(isNaN){
+
+            //se nao for entao converte para float
+            price = parseFloat(price);
+        }
+
+        //adiciona no vetor final
+        priceFormated.push(price);
+    });
+    
+    //console.log(priceFormated);
+    return priceFormated;
+}
+
 recoverName();
+recoverPrice();
 console.log(brokenDB);

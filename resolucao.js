@@ -141,5 +141,38 @@ const validateList = () => {
     console.log(db.map(obj => obj.name));
 }
 
-//a funcao validatelist so pode ser chamada depois do arquivo saida estar pronto
-createObjects(validateList());
+//Funcao que calcula a quantidade de tudo de uma categoria
+const quantityPerCategory = () => {
+
+    //le o arquivo gerado
+    db = readJSON('./saida.json');
+
+    //cria set para evitar repeticoes
+    const setCategory = new Set;
+
+    //passa por todos os objetos adicionando a categoria no set
+    //por ser set nao preciso me preucupar com repeticoes
+    db.forEach(obj => {
+        setCategory.add(obj.category);
+    });
+    
+    //percorre todas as categorias
+    setCategory.forEach(category =>{
+
+        //cria um vetor filtrado por categoria
+        filteredDB = db.filter(obj => obj.category === category);
+
+        //aplica a funcao reduce somando as quantidades dos objetos do vetor filtrado
+        quantity = filteredDB.map(obj => obj.quantity).reduce(function(total, add){
+            return total+add;
+        });
+
+        console.log(`Estoque de ${category} = ${quantity}`);
+    });
+}
+
+/* 
+    as funcoes validatelist e quantityPerCategory so podem
+     ser chamadas depois do arquivo saida estar pronto
+*/
+createObjects(validateList(), quantityPerCategory());

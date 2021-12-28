@@ -1,10 +1,10 @@
 //funcao para leitura do json
-const readJSON = () => require('./broken-database.json');
+const readJSON = file => require(file);
 
 //Funcao para recuperar o nome verdadeiro
 const recoverName = () => {
 
-    brokenDB = readJSON();
+    brokenDB = readJSON('./broken-database.json');
     //cria um array apenas com os nomes
     names = brokenDB.map(obj => obj.name);
     
@@ -31,7 +31,7 @@ const recoverName = () => {
 //Funcao que recupera os precos transformando as string em numbers
 const recoverPrice = () => {
     
-    brokenDB = readJSON();
+    brokenDB = readJSON('./broken-database.json');
     //cria um array so com os precos
     prices = brokenDB.map(obj => obj.price);
 
@@ -58,7 +58,7 @@ const recoverPrice = () => {
 //Funcao que cria os objetos que serao salvos na saida
 const createObjects = () => {
 
-    brokenDB = readJSON();
+    brokenDB = readJSON('./broken-database.json');
     //chama as funcoes que corrige o nome e preco
     recoverName();
     recoverPrice();
@@ -113,5 +113,33 @@ const saveJSON = (data) => {
     fs.writeFile('saida.json', JSONData, finished);
 }
 
-readJSON();
-createObjects();
+//Funcao que imprime a lista corrigida ordenada por categoria e id
+const validateList = () => {
+
+    //le o arquivo gerado
+    db = readJSON('./saida.json');
+
+    db.sort(function(a,b) {
+        
+        //organiza por categoria
+        if(a.category < b.category){
+            return -1;
+        } else if (a.category > b.category){
+            return 1;
+        }
+
+        //chega apenas quando estiver na mesma categoria
+        //organiza crescentemente por id
+        if(a.id < b.id){
+            return -1;
+        } else {
+            return 1;
+        }
+    });
+    
+    //imprime apenas o nome
+    console.log(db.map(obj => obj.name));
+}
+
+//a funcao validatelist so pode ser chamada depois do arquivo saida estar pronto
+createObjects(validateList());

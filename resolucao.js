@@ -1,3 +1,5 @@
+const { resolve } = require('path/posix');
+
 //funcao para leitura do json
 const readJSON = file => require(file);
 
@@ -5,6 +7,7 @@ const readJSON = file => require(file);
 const recoverName = () => {
 
     brokenDB = readJSON('./broken-database.json');
+    
     //cria um array apenas com os nomes
     names = brokenDB.map(obj => obj.name);
     
@@ -25,13 +28,13 @@ const recoverName = () => {
         nameFormated.push(name);
     });
 
-    //console.log(nameFormated);
 }
 
 //Funcao que recupera os precos transformando as string em numbers
 const recoverPrice = () => {
     
     brokenDB = readJSON('./broken-database.json');
+
     //cria um array so com os precos
     prices = brokenDB.map(obj => obj.price);
 
@@ -52,13 +55,13 @@ const recoverPrice = () => {
         priceFormated.push(price);
     });
     
-    //console.log(priceFormated);
 }
 
 //Funcao que cria os objetos que serao salvos na saida
 const createObjects = () => {
 
     brokenDB = readJSON('./broken-database.json');
+
     //chama as funcoes que corrige o nome e preco
     recoverName();
     recoverPrice();
@@ -83,12 +86,11 @@ const createObjects = () => {
         }
     }
     
-    //console.log(brokenDB);
     saveJSON(finalObj);
 }
 
 //funcao que cira o arquivo saida.json
-const saveJSON = (data) => {
+const saveJSON = data => {
 
     /*
         Para criar essa funcao utilizei como base a funcao apresentada
@@ -110,14 +112,22 @@ const saveJSON = (data) => {
     const JSONData = JSON.stringify(data, null, 2);
 
     //escreve no arquivo saida.json
-    fs.writeFile('saida.json', JSONData, finished);
+    fs.writeFileSync('saida.json', JSONData, finished);
+    validateList();
+    quantityPerCategory();
+
 }
 
 //Funcao que imprime a lista corrigida ordenada por categoria e id
 const validateList = () => {
 
     //le o arquivo gerado
-    db = readJSON('./saida.json');
+    try{
+        db = readJSON('./saida.json');
+
+    }catch(e) {
+        console.log(e);
+    }
 
     db.sort(function(a,b) {
         
@@ -145,7 +155,12 @@ const validateList = () => {
 const quantityPerCategory = () => {
 
     //le o arquivo gerado
-    db = readJSON('./saida.json');
+    try{
+        db = readJSON('./saida.json');
+
+    }catch(e) {
+        console.log(e);
+    }
 
     //cria set para evitar repeticoes
     const setCategory = new Set;
@@ -171,8 +186,5 @@ const quantityPerCategory = () => {
     });
 }
 
-/* 
-    as funcoes validatelist e quantityPerCategory so podem
-     ser chamadas depois do arquivo saida estar pronto
-*/
-createObjects(validateList(), quantityPerCategory());
+
+createObjects();

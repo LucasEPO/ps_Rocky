@@ -1,18 +1,24 @@
-const { resolve } = require('path/posix');
-
 //funcao para leitura do json
-const readJSON = file => require(file);
+function readJSON(file) {
+
+    //tenta pegar o arquivo se nao conseguir retorna null
+    try{
+       return require(file);  
+    }catch(e) {
+        console.error(e);
+    }
+
+    return null;
+} 
 
 //Funcao para recuperar o nome verdadeiro
-const recoverName = () => {
+function recoverName(brokenDB) {
 
-    brokenDB = readJSON('./broken-database.json');
-    
     //cria um array apenas com os nomes
-    names = brokenDB.map(obj => obj.name);
+    const names = brokenDB.map(obj => obj.name);
     
     //array de retorno com nomes formatados
-    nameFormated = [];
+    const nameFormated = [];
 
     //percorre todos os nomes
     names.forEach(name => {
@@ -28,18 +34,17 @@ const recoverName = () => {
         nameFormated.push(name);
     });
 
+    return nameFormated;
 }
 
 //Funcao que recupera os precos transformando as string em numbers
-const recoverPrice = () => {
+function recoverPrice(brokenDB){
     
-    brokenDB = readJSON('./broken-database.json');
-
     //cria um array so com os precos
-    prices = brokenDB.map(obj => obj.price);
+    const prices = brokenDB.map(obj => obj.price);
 
     //array de retorno com todos os valores sendo numeros
-    priceFormated = [];
+    const priceFormated = [];
 
     //percorre todos os precos
     prices.forEach(price => {
@@ -55,28 +60,34 @@ const recoverPrice = () => {
         priceFormated.push(price);
     });
     
+    return priceFormated;
 }
 
 //Funcao que cria os objetos que serao salvos na saida
-const createObjects = () => {
+function createObjects() {
 
-    brokenDB = readJSON('./broken-database.json');
+    const brokenDB = readJSON('./broken-database.json');
+
+    //verfica se achou o arquivo
+    if(!brokenDB){
+        return;
+    }
 
     //chama as funcoes que corrige o nome e preco
-    recoverName();
-    recoverPrice();
+    names = recoverName(brokenDB);
+    prices = recoverPrice(brokenDB);
 
     //copia para alterar no vetor final apenas
-    finalObj = brokenDB;
+    const finalObj = brokenDB;
 
     //percorre todos os objetos
     for (const index in finalObj) {
 
         //altera o nome para o corrigido ja que eles sempre estao no mesmo index
-        finalObj[index].name = nameFormated[index];
+        finalObj[index].name = names[index];
 
         //altera o preco para o corrigido
-        finalObj[index].price = priceFormated[index];
+        finalObj[index].price = prices[index];
 
         //verifica se o objeto tem o atributo quantity
         if(!finalObj[index].quantity){
@@ -85,12 +96,12 @@ const createObjects = () => {
             finalObj[index].quantity = 0;          
         }
     }
-    
+
     saveJSON(finalObj);
 }
 
 //funcao que cira o arquivo saida.json
-const saveJSON = data => {
+function saveJSON(data) {
 
     /*
         Para criar essa funcao utilizei como base a funcao apresentada
@@ -113,38 +124,36 @@ const saveJSON = data => {
 
     //escreve no arquivo saida.json
     fs.writeFileSync('saida.json', JSONData, finished);
+
+    //somente apos terminar de escrever o arquivo chama essas duas funcoes
     validateList();
     quantityPerCategory();
 
 }
 
 //Funcao que imprime a lista corrigida ordenada por categoria e id
-const validateList = () => {
+function validateList() {
 
     //le o arquivo gerado
-    try{
-        db = readJSON('./saida.json');
+    db = readJSON('./saida.json');
 
-    }catch(e) {
-        console.log(e);
+    //verfica se achou o arquivo
+    if(!db){
+        return;
     }
 
-    db.sort(function(a,b) {
+    db.sort((a,b) => {
         
         //organiza por categoria
-        if(a.category < b.category){
+        if( a.category < b.category ){
             return -1;
-        } else if (a.category > b.category){
+        } else if ( a.category > b.category ){
             return 1;
         }
 
         //chega apenas quando estiver na mesma categoria
         //organiza crescentemente por id
-        if(a.id < b.id){
-            return -1;
-        } else {
-            return 1;
-        }
+        return a.id < b.id ? -1 : 1; 
     });
     
     //imprime apenas o nome
@@ -152,14 +161,14 @@ const validateList = () => {
 }
 
 //Funcao que calcula a quantidade de tudo de uma categoria
-const quantityPerCategory = () => {
+function quantityPerCategory() {
 
     //le o arquivo gerado
-    try{
-        db = readJSON('./saida.json');
+    db = readJSON('./saida.json');
 
-    }catch(e) {
-        console.log(e);
+    //verfica se achou o arquivo
+    if(!db){
+        return;
     }
 
     //cria set para evitar repeticoes
@@ -175,16 +184,15 @@ const quantityPerCategory = () => {
     setCategory.forEach(category =>{
 
         //cria um vetor filtrado por categoria
-        filteredDB = db.filter(obj => obj.category === category);
+        const filteredDB = db.filter(obj => obj.category === category);
 
         //aplica a funcao reduce somando as quantidades dos objetos do vetor filtrado
-        quantity = filteredDB.map(obj => obj.quantity).reduce(function(total, add){
+        const quantity = filteredDB.map(obj => obj.quantity).reduce((total, add) => {
             return total+add;
         });
 
         console.log(`Estoque de ${category} = ${quantity}`);
     });
 }
-
 
 createObjects();
